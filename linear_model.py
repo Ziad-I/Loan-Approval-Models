@@ -15,7 +15,7 @@ def sanitize_data(path):
     data.dropna(inplace=True)
 
     # replacing coapplicant_income with values 0 with the mean value
-    data['Coapplicant_Income'] = data['Coapplicant_Income'].replace(0, data[data['Coapplicant_Income'] != 0]['Coapplicant_Income'].mean())
+    data['Coapplicant_Income'] = data['Coapplicant_Income'].replace(0, data[data['Coapplicant_Income'] == 0]['Coapplicant_Income'].mean())
     
     # removing outliers in the income
     data.drop(data[data['Income']>25000].index,axis=0,inplace=True)
