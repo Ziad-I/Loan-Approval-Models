@@ -3,7 +3,6 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder
 from sklearn.impute import SimpleImputer
-import math
 import typing
 
 
@@ -72,63 +71,57 @@ X_train, X_test, y_train, y_test = train_test_split(
 #     X_test_encoded[numerical_columns])
 
 
-def get_z(w, x, b):
-    return np.dot(w, x) + b
+def get_z(x, w, b):
+    return np.dot(x, w) + b
 
 # sigmoid: g(z)
-# returns one value not a list, which is the sigmoid value for a single row
 
 
 def get_sigmoid(z):
     return 1/(1+np.exp(-z))
 
-# returns a list, each element is the sigmoid value for a single row
 
-
-def get_sigmoid_values(w, x, b):
-    m = x.shape[0]
-    sigmoid_values = np.zeros(m)
-    for i in range(m):
-        z = get_z(w, x[i], b)
-        sigmoid_values[i] = get_sigmoid(z)
-    return sigmoid_values
+# cost function:
+# L(fw,b(xi), y) = -ylog(fw,b(x)) - (1-y)log(1-fw,b(x))
+# J = -1/m * sigma (-ylog(fw,b(x)) - (1-y)log(1-fw,b(x)))
+def get_cost(y, predictions):
+    m = len(y)
+    cost = (-1/m) * np.sum(-y * np.log(predictions) -
+                           (1-y)*np.log(1-predictions))
+    return cost
 
 # Logistic Regression
 
 
 def logistic_regression(x, y):
-    # hypothesis function
 
     x = x.to_numpy()
-    y = y.to_numpy().flatten()
+    y = y.to_numpy()
 
-    rows, cols = x.shape[0], x.shape[1]
-    w = np.zeros((1, cols)).flatten()
+    m, features = x.shape[0], x.shape[1]
+    # fx1
+    w = np.zeros((features, 1))
     b = 0
-
-    sigmoid_values = get_sigmoid_values(w, x, b)
-
-    # cost function:
-    # L(fw,b(xi), y) = -ylog(fw,b(x)) - (1-y)log(1-fw,b(x))
-    # J = -1/m * sigma (-ylog(fw,b(x)) - (1-y)log(1-fw,b(x)))
-    cost = (-1/rows) * np.sum(-y * np.log10(sigmoid_values) -
-                              (1-y)*np.log10(1-sigmoid_values))
 
     # gradient descent
     alpha = 0.001
     max_iterations = 100
 
     for i in range(max_iterations):
-        h = get_sigmoid_values(w, x, b)
-        # print(h, x[i], y)
-        new_w = np.zeros((cols))
-        new_b = 0
-        for j in range(cols):
-            dw = (1/rows) * np.sum(np.dot((h-y), x[i][j]))
-            new_w[j] = w[j]-alpha*dw
+        # mxf . fx1 = mx1
+        z = get_z(x, w, b)
+        predictions = get_sigmoid(z)
 
+        # fxm . mx1 = fx1
+        dw = (1/m) * np.dot(x.T, predictions - y)
+        db = (1/m) * np.sum(predictions - y)
+
+        new_w = w - alpha * dw
+        new_b = b - alpha * db
         w = new_w
         b = new_b
+
+    return w, b
 
     # how to predict? should we use f(x) or sigmoid?
 
@@ -143,4 +136,4 @@ def logistic_regression(x, y):
 
 
 # debugging
-logistic_regression(x, y)
+print(logistic_regression(x, y))
