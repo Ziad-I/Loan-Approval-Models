@@ -1,0 +1,6 @@
+Loan_ID,Gender,Married,Dependents,Education,Income,Coapplicant_Income,Loan_Tenor,Credit_History,Property_Area,Max_Loan_Amount,Loan_Status
+LP001002,0,0,0,0,5849,4425,162,1,0,135.99,1
+LP001003,0,1,1,0,4583,1508,568,1,1,236.99,0
+LP001005,1,0,0,1,3000,425,174,1,0,81.20,1
+LP001006,1,0,0,0,2583,2358,12,1,1,179.03,0
+LP001008,0,1,0,1,6000,0,110,1,0,232.40,1
