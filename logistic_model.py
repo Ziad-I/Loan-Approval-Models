@@ -7,69 +7,62 @@ import math
 import typing
 
 
-# Importing Data
-df = pd.read_csv("data/debug.csv")
+def sanitize_data(path):
+    data = pd.read_csv('./data/loan_old.csv')
+    # data.info()
 
-# Preprocessing
-df.dropna(inplace=True)
+    # dropping rows with missing values
+    data.dropna(inplace=True)
+
+    # replacing coapplicant_income with values 0 with the mean value
+    data['Coapplicant_Income'] = data['Coapplicant_Income'].replace(0, data[data['Coapplicant_Income'] == 0][
+        'Coapplicant_Income'].mean())
+
+    # removing outliers in the income
+    data.drop(data[data['Income'] > 25000].index, axis=0, inplace=True)
+
+    return data
+
+
+clean_data = sanitize_data("'./data/loan_old.csv")
 
 # separating targets and features
-features = ['Gender', 'Married', 'Dependents', 'Education', 'Income',
-            'Coapplicant_Income', 'Loan_Tenor', 'Credit_History', 'Property_Area']
+features = ['Gender', 'Married', 'Dependents', 'Education', 'Income', 'Coapplicant_Income', 'Loan_Tenor',
+            'Credit_History', 'Property_Area']
 targets = ['Loan_Status']
 
-x = df[features]
-y = df[targets]
+x = clean_data[features]
+y = clean_data[targets]
 
 # shuffling and splitting data in testing and training sets
-X_train, X_test, y_train, y_test = train_test_split(
-    x, y, test_size=0.3, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=0)
 
-# def sanitize_data(path):
-#     data = pd.read_csv('./data/loan_old.csv')
-#     # data.info()
+label_encoder = LabelEncoder()
 
-#     # dropping rows with missing values
-#     data.dropna(inplace=True)
+# categorical data are encoded
+for col in X_train.columns:
+    if X_train[col].dtype == 'object':
+        X_train[col] = label_encoder.fit_transform(X_train[col])
 
-#     # replacing coapplicant_income with values 0 with the mean value
-#     data['Coapplicant_Income'] = data['Coapplicant_Income'].replace(
-#         0, data[data['Coapplicant_Income'] == 0]['Coapplicant_Income'].mean())
+for col in y_train.columns:
+    if y_train[col].dtype == 'object':
+        y_train[col] = label_encoder.fit_transform(y_train[col])
 
-#     # removing outliers in the income
-#     data.drop(data[data['Income'] > 25000].index, axis=0, inplace=True)
+for col in X_test.columns:
+    if X_test[col].dtype == 'object':
+        X_test[col] = label_encoder.fit_transform(X_test[col])
 
-#     return data
+for col in y_test.columns:
+    if y_test[col].dtype == 'object':
+        y_test[col] = label_encoder.fit_transform(y_test[col])
 
+# numerical features are standardized
+numerical_columns = X_train.select_dtypes(include=['float64', 'int64']).columns
+scaler = StandardScaler()
+X_train[numerical_columns] = scaler.fit_transform(X_train[numerical_columns])
+X_test[numerical_columns] = scaler.transform(X_test[numerical_columns])
 
-# clean_data = sanitize_data("./data/loan_old.csv")
-
-# # separating targets and features
-# features = ['Gender', 'Married', 'Dependents', 'Education', 'Income',
-#             'Coapplicant_Income', 'Loan_Tenor', 'Credit_History', 'Property_Area']
-# targets = ['loan_status']
-
-# x = clean_data[features]
-# y = clean_data[targets]
-
-# # shuffling and splitting data in testing and training sets
-# X_train, X_test, y_train, y_test = train_test_split(
-#     x, y, test_size=0.3, random_state=0)
-
-# # categorical features are encoded using one-hot encoding
-# categorical_columns = x.select_dtypes(include=['object']).columns
-# X_train_encoded = pd.get_dummies(
-#     X_train, columns=categorical_columns, drop_first=True)
-# X_test_encoded = pd.get_dummies(
-#     X_test, columns=categorical_columns, drop_first=True)
-
-# # numerical features are standardized
-# numerical_columns = X_train.select_dtypes(include=['float64', 'int64']).columns
-# scaler = StandardScaler()
-# X_train_encoded[numerical_columns] = scaler.fit_transform(
-#     X_train_encoded[numerical_columns])
-# X_test_encoded[numerical_columns] = scaler.transform(
-#     X_test_encoded[numerical_columns])
+# print(X_train,y_train)
 
 
 def get_z(w, x, b):
