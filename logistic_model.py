@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder
 from sklearn.impute import SimpleImputer
+import math
 import typing
 
 # Importing Data
@@ -43,31 +44,67 @@ X_train, X_test, y_train, y_test = train_test_split(
 # X_test_encoded[numerical_columns] = scaler.transform(
 #     X_test_encoded[numerical_columns])
 
+# z = w.x + b
+# fw,b(x) = g(z) = 1/(1+e**(-z))
+# returns one value not a list
+
+
+def get_z(w, x, b):
+    return np.dot(w, x) + b
+
+# sigmoid: g(z)
+# returns one value not a list
+
+
+def get_sigmoid(z):
+    return 1/(1+np.exp(-z))
+
+
+def get_sigmoid_values(w, x, b):
+    m = x.shape[0]
+    sigmoid_values = np.zeros(m)
+    for i in range(m):
+        z = get_z(w, x[i], b)
+        sigmoid_values[i] = get_sigmoid(z)
+    return sigmoid_values
 
 # Logistic Regression
+
+
 def logistic_regression(x, y):
     # hypothesis function
 
     x = x.to_numpy()
+    y = y.to_numpy().flatten()
 
     rows, cols = x.shape[0], x.shape[1]
-    w = np.zeros((cols, 1))
+    w = np.zeros((1, cols))
     b = 0
 
-    sigmoid = np.zeros((rows))
-    for i in range(rows):
-        # calculate z
-        z = np.dot(w.T, x[i]) + b
-        # sigmoid
-        sigmoid[i] = 1/(1+np.exp(-z))
+    sigmoid_values = get_sigmoid_values(w, x, b)
 
-    # cost function
+    # cost function:
+    # L(fw,b(xi), y) = -ylog(fw,b(x)) - (1-y)log(1-fw,b(x))
+    # J = -1/m * sigma (-ylog(fw,b(x)) - (1-y)log(1-fw,b(x)))
+    cost = (-1/rows) * np.sum(-y * np.log10(sigmoid_values) -
+                              (1-y)*np.log10(1-sigmoid_values))
 
     # gradient descent
-
-    def gradient_descent():
-        # calculate dw, db
-        pass
+    alpha = 0.001
+    max_iterations = 100
+    for i in range(max_iterations):
+        h = get_sigmoid_values(w, x, b)
+        print(h, x[i], y)
+        new_w = np.zeros((cols))
+        new_b = 0
+        # for j in range(cols):
+        #     dw = (1/rows) * np.sum((h-y)*x[j])
+        #     db = (1/rows) * np.sum(h-y)
+        #     new_w = w-alpha*dw
+        #     new_b = b-alpha*db
+        # w = new_w
+        # b = new_b
+    print(w, b)
 
     # how to predict? should we use f(x) or sigmoid?
 
