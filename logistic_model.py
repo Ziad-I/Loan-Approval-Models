@@ -6,6 +6,7 @@ from sklearn.impute import SimpleImputer
 import math
 import typing
 
+
 # Importing Data
 df = pd.read_csv("data/debug.csv")
 
@@ -24,17 +25,43 @@ y = df[targets]
 X_train, X_test, y_train, y_test = train_test_split(
     x, y, test_size=0.3, random_state=0)
 
+# def sanitize_data(path):
+#     data = pd.read_csv('./data/loan_old.csv')
+#     # data.info()
+
+#     # dropping rows with missing values
+#     data.dropna(inplace=True)
+
+#     # replacing coapplicant_income with values 0 with the mean value
+#     data['Coapplicant_Income'] = data['Coapplicant_Income'].replace(
+#         0, data[data['Coapplicant_Income'] == 0]['Coapplicant_Income'].mean())
+
+#     # removing outliers in the income
+#     data.drop(data[data['Income'] > 25000].index, axis=0, inplace=True)
+
+#     return data
+
+
+# clean_data = sanitize_data("./data/loan_old.csv")
+
+# # separating targets and features
+# features = ['Gender', 'Married', 'Dependents', 'Education', 'Income',
+#             'Coapplicant_Income', 'Loan_Tenor', 'Credit_History', 'Property_Area']
+# targets = ['loan_status']
+
+# x = clean_data[features]
+# y = clean_data[targets]
+
+# # shuffling and splitting data in testing and training sets
+# X_train, X_test, y_train, y_test = train_test_split(
+#     x, y, test_size=0.3, random_state=0)
+
 # # categorical features are encoded using one-hot encoding
 # categorical_columns = x.select_dtypes(include=['object']).columns
 # X_train_encoded = pd.get_dummies(
 #     X_train, columns=categorical_columns, drop_first=True)
 # X_test_encoded = pd.get_dummies(
 #     X_test, columns=categorical_columns, drop_first=True)
-
-# # encode categorical targets
-# le = LabelEncoder()
-# y_train_encoded = le.fit_transform(y_train)
-# y_test_encoded = le.transform(y_test)
 
 # # numerical features are standardized
 # numerical_columns = X_train.select_dtypes(include=['float64', 'int64']).columns
@@ -44,20 +71,18 @@ X_train, X_test, y_train, y_test = train_test_split(
 # X_test_encoded[numerical_columns] = scaler.transform(
 #     X_test_encoded[numerical_columns])
 
-# z = w.x + b
-# fw,b(x) = g(z) = 1/(1+e**(-z))
-# returns one value not a list
-
 
 def get_z(w, x, b):
     return np.dot(w, x) + b
 
 # sigmoid: g(z)
-# returns one value not a list
+# returns one value not a list, which is the sigmoid value for a single row
 
 
 def get_sigmoid(z):
     return 1/(1+np.exp(-z))
+
+# returns a list, each element is the sigmoid value for a single row
 
 
 def get_sigmoid_values(w, x, b):
@@ -78,7 +103,7 @@ def logistic_regression(x, y):
     y = y.to_numpy().flatten()
 
     rows, cols = x.shape[0], x.shape[1]
-    w = np.zeros((1, cols))
+    w = np.zeros((1, cols)).flatten()
     b = 0
 
     sigmoid_values = get_sigmoid_values(w, x, b)
@@ -92,19 +117,18 @@ def logistic_regression(x, y):
     # gradient descent
     alpha = 0.001
     max_iterations = 100
+
     for i in range(max_iterations):
         h = get_sigmoid_values(w, x, b)
-        print(h, x[i], y)
+        # print(h, x[i], y)
         new_w = np.zeros((cols))
         new_b = 0
-        # for j in range(cols):
-        #     dw = (1/rows) * np.sum((h-y)*x[j])
-        #     db = (1/rows) * np.sum(h-y)
-        #     new_w = w-alpha*dw
-        #     new_b = b-alpha*db
-        # w = new_w
-        # b = new_b
-    print(w, b)
+        for j in range(cols):
+            dw = (1/rows) * np.sum(np.dot((h-y), x[i][j]))
+            new_w[j] = w[j]-alpha*dw
+
+        w = new_w
+        b = new_b
 
     # how to predict? should we use f(x) or sigmoid?
 
