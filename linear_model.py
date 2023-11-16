@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 
 
 def sanitize_data(path):
-    data = pd.read_csv('./data/loan_old.csv')
+    data = pd.read_csv(path)
     # data.info()
 
     # dropping rows with missing values
@@ -23,7 +23,7 @@ def sanitize_data(path):
     return data
 
 
-clean_data = sanitize_data("'./data/loan_old.csv")
+clean_data = sanitize_data("./data/loan_old.csv")
 
 # separating targets and features
 features = ['Gender', 'Married', 'Dependents', 'Education', 'Income', 'Coapplicant_Income', 'Loan_Tenor', 'Credit_History', 'Property_Area']

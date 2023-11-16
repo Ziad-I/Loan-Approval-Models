@@ -7,7 +7,7 @@ import typing
 
 
 def sanitize_data(path):
-    data = pd.read_csv('./data/loan_old.csv')
+    data = pd.read_csv(path)
     # data.info()
 
     # dropping rows with missing values
@@ -23,7 +23,7 @@ def sanitize_data(path):
     return data
 
 
-clean_data = sanitize_data("'./data/loan_old.csv")
+clean_data = sanitize_data('./data/loan_old.csv')
 
 # separating targets and features
 features = ['Gender', 'Married', 'Dependents', 'Education', 'Income', 'Coapplicant_Income', 'Loan_Tenor',
@@ -152,8 +152,9 @@ def main():
     print("model accuracy is " + str(accuracy), end="")
 
     # #load new data and preprocess it (encoding and standardization)
-    new_data = sanitize_data("data/loan_new.csv")
-    X_new = new_data[features]
+    new_data = sanitize_data("./data/loan_new.csv")
+    new_data.drop(columns='Loan_ID', inplace=True)
+    X_new = new_data
     X_new[numerical_columns] = scaler.transform(X_new[numerical_columns])
     for col in X_new.columns:
         if X_new[col].dtype == 'object':
