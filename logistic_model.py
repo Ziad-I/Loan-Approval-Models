@@ -147,7 +147,7 @@ def main():
 
     predictions = predict(X_test, w, b)
 
-    accuracy = model_accuracy(predictions, y_test)
+    accuracy = model_accuracy(predictions, y_test.values)
 
     print("model accuracy is " + str(accuracy), end="")
 
