@@ -34,7 +34,8 @@ x = clean_data[features]
 y = clean_data[targets]
 
 # shuffling and splitting data in testing and training sets
-X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(
+    x, y, test_size=0.3, random_state=0)
 
 label_encoder = LabelEncoder()
 
@@ -62,6 +63,7 @@ X_train[numerical_columns] = scaler.fit_transform(X_train[numerical_columns])
 X_test[numerical_columns] = scaler.transform(X_test[numerical_columns])
 
 # print(X_train,y_train)
+# print(y_test)
 
 
 def get_z(x, w, b):
@@ -119,14 +121,47 @@ def logistic_regression(x, y):
     # how to predict? should we use f(x) or sigmoid?
 
 
-# Accuracy
-
-
-# Training
-
-
 # Predict
+def predict(x, w, b):
+    # x . w
+    # mxf . fx1
+
+    z_hat = get_z(x, w, b)
+    sigmoid_hat = get_sigmoid(z_hat)
+    threshold = 0.5
+    y_hat = (sigmoid_hat > threshold).astype(int)
+    return y_hat
 
 
-# debugging
-print(logistic_regression(x, y))
+# Accuracy
+# mx1, mx1
+def model_accuracy(y, y_hat):
+    m = y.shape[0]
+    wrong_predictions = np.sum(np.abs(y - y_hat))
+    return (m - wrong_predictions) / m
+
+
+def main():
+    # Training
+    w, b = logistic_regression(X_train, y_train)
+
+    predictions = predict(X_test, w, b)
+
+    accuracy = model_accuracy(predictions, y_test)
+
+    print("model accuracy is " + str(accuracy), end="")
+
+    # #load new data and preprocess it (encoding and standardization)
+    new_data = sanitize_data("data/loan_new.csv")
+    X_new = new_data[features]
+    X_new[numerical_columns] = scaler.transform(X_new[numerical_columns])
+    for col in X_new.columns:
+        if X_new[col].dtype == 'object':
+            X_new[col] = label_encoder.fit_transform(X_new[col])
+    # predict for new data
+    predictions_new = predict(X_new, w, b)
+    print(predictions_new)
+
+
+if __name__ == "__main__":
+    main()
